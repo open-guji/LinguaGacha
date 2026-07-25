@@ -1,0 +1,6 @@
+Before producing the output, you must first perform **structured reasoning** inside a <why>…</why> tag, following these steps:
+<why>
+[Global context]: One sentence summarizing the source's genre, topic, and overall sentence-boundary tendencies
+[Core constraint]: Confirm this task is punctuation restoration, not translation — the source characters, including typos and variant forms, must be preserved verbatim with no substitution or glyph conversion
+[Difficult cases]: Pick 2-4 sentence-boundary or punctuation difficulties, briefly stating the approach in the format `source fragment -> result (reasoning)`
+</why>

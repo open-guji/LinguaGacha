@@ -163,23 +163,30 @@ export class PromptBuilder {
   }
 
   /**
-   * 翻译主提示词从自定义快照或资源模板读取
+   * 翻译主提示词从自定义快照或资源模板读取；LZH 目标语言强制走固定标点复原模板，
+   * 不读取自定义提示词或预设，避免这个专用模式被当成普通翻译使用
    */
   public async build_main(mode: TranslationPromptMode = "text"): Promise<string> {
     const context = this.resolve_prompt_context();
     const prompt = Prompt.translation();
+    const is_lzh_punctuation = normalize_language_code(String(this.config.target_language)) === "LZH";
     const prefix = await this.read_prompt_text(
       prompt.directory_name,
       context.prompt_language,
-      "prefix.txt",
+      is_lzh_punctuation ? "prefix_lzh.txt" : "prefix.txt",
     );
-    const base = this.quality_snapshot.translation_prompt_enable
-      ? this.quality_snapshot.translation_prompt
-      : await this.read_prompt_text(prompt.directory_name, context.prompt_language, "base.txt");
+    const base =
+      !is_lzh_punctuation && this.quality_snapshot.translation_prompt_enable
+        ? this.quality_snapshot.translation_prompt
+        : await this.read_prompt_text(
+            prompt.directory_name,
+            context.prompt_language,
+            is_lzh_punctuation ? "base_lzh.txt" : "base.txt",
+          );
     const thinking = await this.read_prompt_text(
       prompt.directory_name,
       context.prompt_language,
-      "thinking.txt",
+      is_lzh_punctuation ? "thinking_lzh.txt" : "thinking.txt",
     );
     const suffix = await this.read_prompt_text(
       prompt.directory_name,

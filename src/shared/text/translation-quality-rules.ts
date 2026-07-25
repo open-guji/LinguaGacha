@@ -107,7 +107,9 @@ export function is_translation_text_similar(left: string, right: string): boolea
  */
 function is_chinese_target_language(targetLanguage: string): boolean {
   const target_language = normalize_language_code(targetLanguage);
-  return target_language === "ZH" || target_language === "ZH-HANT";
+  return (
+    target_language === "ZH" || target_language === "ZH-HANT" || target_language === "LZH"
+  );
 }
 
 /**

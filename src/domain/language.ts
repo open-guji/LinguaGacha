@@ -39,6 +39,7 @@ export const SOURCE_LANGUAGE_CODES = [
 export const TARGET_LANGUAGE_CODES = [
   "ZH", // 中文
   "ZH-HANT", // 中文（繁体）
+  "LZH", // 中文（繁体，文言文）：仅用于标点复原，代码强制走固定提示词，不是常规翻译目标
   "EN", // 英文
   "JA", // 日文
   "KO", // 韩文
@@ -100,6 +101,11 @@ export const LANGUAGE_DISPLAY_NAMES: Record<
     zh: "中文（繁体）",
     en: "Traditional Chinese",
     de: "Chinesisch (traditionell)",
+  },
+  LZH: {
+    zh: "中文（繁体，文言文）",
+    en: "Chinese (Traditional, Classical Punctuation)",
+    de: "Chinesisch (traditionell, klassische Zeichensetzung)",
   },
   EN: {
     zh: "英文",
@@ -491,6 +497,7 @@ export const LANGUAGE_DEFINITIONS: Record<LanguageCode, LanguageDefinition> = {
   ALL: build_definition("ALL", false, null, null), // 关闭语言过滤
   ZH: build_definition("ZH", true, is_han_character, HAN_TEXT_PATTERN), // 中文只以 Han Script 正文命中
   "ZH-HANT": build_definition("ZH-HANT", true, is_han_character, HAN_TEXT_PATTERN), // 繁中复用 Han Script，不按字符范围区分简繁
+  LZH: build_definition("LZH", true, is_han_character, HAN_TEXT_PATTERN), // 文言文标点复用 Han Script，字符判断与繁中一致
   EN: build_definition("EN", false, is_latin_character, LATIN_TEXT_PATTERN), // 英文走 Latin Script 粗过滤
   JA: build_definition("JA", true, is_ja_character, JAPANESE_TEXT_PATTERN), // 日文允许 Han + Kana 混排
   KO: build_definition("KO", true, is_ko_character, KOREAN_TEXT_PATTERN), // 韩文允许 Han + Hangul 混排
@@ -512,7 +519,7 @@ export const LANGUAGE_DEFINITIONS: Record<LanguageCode, LanguageDefinition> = {
 /**
  * 集中维护当前模块的稳定常量。
  */
-export const CJK_LANGUAGE_CODES = new Set<LanguageCode>(["ZH", "ZH-HANT", "JA", "KO"]); // CJK 语言集合供 UI 和规则分支快速判断，不重复解释字符范围
+export const CJK_LANGUAGE_CODES = new Set<LanguageCode>(["ZH", "ZH-HANT", "LZH", "JA", "KO"]); // CJK 语言集合供 UI 和规则分支快速判断，不重复解释字符范围
 
 // 语言码入口统一大小写与空白处理，未知值显式返回 null
 /**

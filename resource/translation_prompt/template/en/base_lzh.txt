@@ -1,0 +1,5 @@
+- The output text must be character-for-character identical to the source; the only permitted change is inserting or correcting punctuation. Any typos, variant characters, or rare characters in the source must be preserved exactly as they are — do not correct, substitute, add, remove, or reorder characters, and do not convert between Simplified and Traditional glyphs.
+- Do not convert the Classical Chinese into vernacular Chinese; do not paraphrase, rewrite, or add content that is not in the source.
+- Use standard modern punctuation marks (，。、；：？！“”‘’《》……) to punctuate the source, accurately marking sentence boundaries, dialogue, quotations, and book-title marks. If the source already has punctuation, only correct obvious errors; do not re-segment the whole passage.
+- The line count of the source and output must correspond strictly; merging or splitting lines is strictly prohibited. Each source line corresponds to exactly one processed output line.
+- Preserve control characters, code, style markers, and escape characters that carry no textual content exactly as they are; do not punctuate or otherwise alter them.

@@ -42,8 +42,10 @@ describe("languages", () => {
       [ALL_LANGUAGE_CODE, ...LANGUAGE_CODES].sort(),
     );
     expect(SOURCE_LANGUAGE_CODES).not.toContain("ZH-HANT");
+    expect(SOURCE_LANGUAGE_CODES).not.toContain("LZH");
     expect(TARGET_LANGUAGE_CODES).toContain("ZH-HANT");
-    expect(TARGET_LANGUAGE_CODES.slice(0, 3)).toEqual(["ZH", "ZH-HANT", "EN"]);
+    expect(TARGET_LANGUAGE_CODES).toContain("LZH");
+    expect(TARGET_LANGUAGE_CODES.slice(0, 4)).toEqual(["ZH", "ZH-HANT", "LZH", "EN"]);
   });
 
   it("集中维护统一语言名称与 i18n key", () => {
@@ -55,6 +57,10 @@ describe("languages", () => {
     expect(get_language_display_name("ZH-HANT", "en")).toBe("Traditional Chinese");
     expect(get_language_display_name("ZH", "de")).toBe("Chinesisch");
     expect(get_language_display_name("ZH-HANT", "de")).toBe("Chinesisch (traditionell)");
+    expect(get_language_display_name("LZH", "zh")).toBe("中文（繁体，文言文）");
+    expect(get_language_display_name("LZH", "en")).toBe(
+      "Chinese (Traditional, Classical Punctuation)",
+    );
     expect(get_language_display_name("JA", "de")).toBe("Japanisch");
     expect(get_language_display_name("EN", "de")).toBe("Englisch");
     expect(get_language_label_key("JA")).toBe("app.language.JA");
@@ -93,6 +99,7 @@ describe("languages", () => {
   it("识别 CJK 语言分组和对应文字", () => {
     expect(is_cjk_language_code("ja")).toBe(true);
     expect(is_cjk_language_code("zh-hant")).toBe(true);
+    expect(is_cjk_language_code("lzh")).toBe(true);
     expect(is_cjk_language_code("EN")).toBe(false);
     expect(has_language_character("かなカナ漢字", "JA")).toBe(true);
     expect(has_language_character("한국어", "KO")).toBe(true);

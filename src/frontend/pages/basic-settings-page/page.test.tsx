@@ -206,11 +206,14 @@ describe("BasicSettingsPage", () => {
     expect(target_section?.querySelector('[data-value="ZH-HANT"]')?.textContent).toBe(
       "app.language.ZH-HANT",
     );
+    expect(target_section?.querySelector('[data-value="LZH"]')?.textContent).toBe(
+      "app.language.LZH",
+    );
     expect(
       [...(target_section?.querySelectorAll("[data-value]") ?? [])]
-        .slice(0, 3)
+        .slice(0, 4)
         .map((item) => item.getAttribute("data-value")),
-    ).toEqual(["ZH", "ZH-HANT", "EN"]);
+    ).toEqual(["ZH", "ZH-HANT", "LZH", "EN"]);
   });
 
   it("提交非法请求超时时间时标记红框并弹 toast", async () => {

@@ -217,6 +217,42 @@ describe("PromptBuilder", () => {
     );
   });
 
+  it("目标语言为 LZH 时强制使用固定标点模板，忽略自定义翻译提示词和常规模板", async () => {
+    const app_root = await create_template_root();
+    await write_template(
+      app_root,
+      "translation_prompt",
+      "zh",
+      {
+        prefix: "标点前缀",
+        base: "标点规则 {target_language}",
+        thinking: "标点思考",
+        suffix: "输出 JSONLINE\n{translation_output_format}",
+      },
+      "_lzh",
+    );
+    const builder = new PromptBuilder(
+      app_root,
+      {
+        app_language: "ZH",
+        source_language: "ZH",
+        target_language: "LZH",
+      },
+      create_quality_snapshot({
+        translation_prompt_enable: true,
+        translation_prompt: "自定义规则：不应生效",
+      }),
+    );
+
+    const result = await builder.build_main("text");
+
+    expect(result).toContain("标点前缀");
+    expect(result).toContain("标点规则 中文（繁体，文言文）");
+    expect(result).toContain("标点思考");
+    expect(result).not.toContain("自定义规则");
+    expect(result).not.toContain("请从");
+  });
+
   it("术语表匹配时尊重大小写标志并格式化 info 字段", () => {
     const builder = new PromptBuilder(
       "unused",
@@ -448,11 +484,12 @@ async function write_template(
   task_dir_name: string,
   language: "zh" | "en",
   sections: Record<"prefix" | "base" | "thinking" | "suffix", string>,
+  file_suffix = "",
 ): Promise<void> {
   const dir = path.join(app_root, "resource", task_dir_name, "template", language);
   await mkdir(dir, { recursive: true });
   for (const [name, content] of Object.entries(sections)) {
-    await writeFile(path.join(dir, `${name}.txt`), content, "utf-8");
+    await writeFile(path.join(dir, `${name}${file_suffix}.txt`), content, "utf-8");
   }
 }
 

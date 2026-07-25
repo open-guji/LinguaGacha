@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   collect_translation_residue_fragments,
+  has_lzh_punctuation_missing_issue,
   has_translation_retry_reached_review_threshold,
   has_translation_similarity_issue,
   is_translation_text_similar,
@@ -103,5 +104,48 @@ describe("translation-quality-rules", () => {
         targetLanguage: "EN",
       }),
     ).toBe(true);
+  });
+
+  it("LZH 标点复原目标语言永远不触发相似度 issue", () => {
+    expect(
+      has_translation_similarity_issue({
+        src: "子曰學而時習之",
+        dst: "子曰學而時習之",
+        sourceLanguage: "ZH",
+        targetLanguage: "LZH",
+      }),
+    ).toBe(false);
+    expect(
+      has_translation_similarity_issue({
+        src: "子曰學而時習之",
+        dst: "子曰：「學而時習之。」",
+        sourceLanguage: "ZH",
+        targetLanguage: "LZH",
+      }),
+    ).toBe(false);
+  });
+
+  it("LZH 译文与原文逐字相同时判定为未添加标点", () => {
+    expect(
+      has_lzh_punctuation_missing_issue({
+        src: "子曰學而時習之",
+        dst: "子曰學而時習之",
+        targetLanguage: "LZH",
+      }),
+    ).toBe(true);
+    expect(
+      has_lzh_punctuation_missing_issue({
+        src: "子曰學而時習之",
+        dst: "子曰：「學而時習之。」",
+        targetLanguage: "LZH",
+      }),
+    ).toBe(false);
+    expect(
+      has_lzh_punctuation_missing_issue({
+        src: "same text",
+        dst: "same text",
+        targetLanguage: "ZH",
+      }),
+    ).toBe(false);
   });
 });

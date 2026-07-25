@@ -8,6 +8,7 @@ export const PROOFREADING_WARNING_CODES = [
   "HANGEUL",
   "TEXT_PRESERVE",
   "SIMILARITY",
+  "PUNCTUATION_MISSING",
   "GLOSSARY",
   "RETRY_THRESHOLD",
 ] as const;
@@ -47,6 +48,7 @@ export const PROOFREADING_WARNING_LABEL_KEY_BY_CODE = {
   HANGEUL: "proofreading_page.warning.hangeul",
   TEXT_PRESERVE: "proofreading_page.warning.text_preserve",
   SIMILARITY: "proofreading_page.warning.similarity",
+  PUNCTUATION_MISSING: "proofreading_page.warning.punctuation_missing",
   GLOSSARY: "proofreading_page.warning.glossary",
   RETRY_THRESHOLD: "proofreading_page.warning.retry_threshold",
   NO_WARNING: "proofreading_page.filter.no_warning",

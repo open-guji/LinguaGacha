@@ -107,13 +107,13 @@ export function is_translation_text_similar(left: string, right: string): boolea
  */
 function is_chinese_target_language(targetLanguage: string): boolean {
   const target_language = normalize_language_code(targetLanguage);
-  return (
-    target_language === "ZH" || target_language === "ZH-HANT" || target_language === "LZH"
-  );
+  return target_language === "ZH" || target_language === "ZH-HANT";
 }
 
 /**
  * 相似度 issue 是质量裁决，不等同于 UI 的独立残留 warning；日/韩译中文时必须伴随对应残留。
+ * LZH 标点复原任务的译文本就该与原文高度相似，这条裁决对它没有意义，交给
+ * has_lzh_punctuation_missing_issue 单独判断。
  */
 export function has_translation_similarity_issue(args: {
   src: string;
@@ -121,6 +121,9 @@ export function has_translation_similarity_issue(args: {
   sourceLanguage: string;
   targetLanguage: string;
 }): boolean {
+  if (normalize_language_code(args.targetLanguage) === "LZH") {
+    return false;
+  }
   if (!is_translation_text_similar(args.src, args.dst)) {
     return false;
   }
@@ -142,4 +145,21 @@ export function has_translation_similarity_issue(args: {
   }
 
   return true;
+}
+
+/**
+ * LZH 标点复原任务里译文应当只比原文多出标点；译文与原文逐字相同代表模型
+ * 实际没有添加任何标点，这是需要暴露给用户的失败信号，而不是"相似度过高"。
+ */
+export function has_lzh_punctuation_missing_issue(args: {
+  src: string;
+  dst: string;
+  targetLanguage: string;
+}): boolean {
+  if (normalize_language_code(args.targetLanguage) !== "LZH") {
+    return false;
+  }
+  const src_text = args.src.trim();
+  const dst_text = args.dst.trim();
+  return src_text !== "" && src_text === dst_text;
 }

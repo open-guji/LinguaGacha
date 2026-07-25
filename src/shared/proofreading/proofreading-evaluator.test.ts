@@ -91,6 +91,26 @@ describe("proofreading-evaluator", () => {
     );
   });
 
+  it("LZH 标点复原目标语言下译文未变化触发未添加标点警告而非相似度警告", () => {
+    const untouched = evaluate({
+      src: "子曰學而時習之",
+      dst: "子曰學而時習之",
+      sourceLanguage: "ZH",
+      targetLanguage: "LZH",
+    });
+    expect(untouched?.warnings).toContain("PUNCTUATION_MISSING");
+    expect(untouched?.warnings).not.toContain("SIMILARITY");
+
+    const punctuated = evaluate({
+      src: "子曰學而時習之",
+      dst: "子曰：「學而時習之。」",
+      sourceLanguage: "ZH",
+      targetLanguage: "LZH",
+    });
+    expect(punctuated?.warnings).not.toContain("PUNCTUATION_MISSING");
+    expect(punctuated?.warnings).not.toContain("SIMILARITY");
+  });
+
   it("姓名字段中的术语缺失会触发术语警告", () => {
     const quality = create_quality({
       glossary: {

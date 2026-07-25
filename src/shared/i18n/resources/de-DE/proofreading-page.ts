@@ -60,6 +60,7 @@ export const de_de_proofreading_page = {
     hangeul: "Hangeul-Rückstand",
     text_preserve: "Textschutz fehlgeschlagen",
     similarity: "Hohe Ähnlichkeit",
+    punctuation_missing: "Keine Zeichensetzung hinzugefügt",
     glossary: "Glossar nicht angewendet",
     retry_threshold: "Wiederholungsschwelle erreicht",
   },

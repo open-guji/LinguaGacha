@@ -60,6 +60,7 @@ export const en_us_proofreading_page = {
     hangeul: "Hangeul Residue",
     text_preserve: "Text Preserve Failed",
     similarity: "High Similarity",
+    punctuation_missing: "No Punctuation Added",
     glossary: "Glossary Not Applied",
     retry_threshold: "Retry Threshold Reached",
   },

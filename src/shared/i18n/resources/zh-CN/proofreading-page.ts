@@ -57,6 +57,7 @@ export const zh_cn_proofreading_page = {
     hangeul: "谚文残留",
     text_preserve: "文本保护失效",
     similarity: "相似度过高",
+    punctuation_missing: "未添加标点",
     glossary: "术语表未生效",
     retry_threshold: "重试次数达阈值",
   },

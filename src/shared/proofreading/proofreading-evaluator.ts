@@ -18,6 +18,7 @@ import { create_proofreading_client_item } from "./list";
 import type { TextPreserveRule } from "../text/text-preserve-rules";
 import {
   collect_translation_residue_fragments,
+  has_lzh_punctuation_missing_issue,
   has_translation_retry_reached_review_threshold,
   has_translation_similarity_issue,
 } from "../text/translation-quality-rules";
@@ -152,6 +153,16 @@ export function evaluateProofreadingItem(args: {
       })
     ) {
       warnings.push("SIMILARITY");
+    }
+
+    if (
+      has_lzh_punctuation_missing_issue({
+        src: stripQualityPreservedSegments(src_replaced, sample_rule),
+        dst: stripQualityPreservedSegments(dst_replaced, sample_rule),
+        targetLanguage: args.targetLanguage,
+      })
+    ) {
+      warnings.push("PUNCTUATION_MISSING");
     }
   }
 

@@ -47,4 +47,9 @@ export const PROJECT_FORMAT_SUPPORT_ITEMS: ProjectFormatSupportItem[] = [
     title_key: "project_page.formats.wolf",
     extensions: ".xlsx",
   },
+  {
+    id: "guishuipage",
+    title_key: "project_page.formats.guishuipage",
+    extensions: ".json",
+  },
 ];

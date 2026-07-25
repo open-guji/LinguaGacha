@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { Item, type ItemFileType } from "../../domain/item";
 import { ASSFormat } from "./formats/ass-format";
+import { GuishuiPageFormat } from "./formats/guishuipage-format";
 import { KVJSONFormat } from "./formats/kvjson-format";
 import { MDFormat } from "./formats/md-format";
 import { MESSAGEJSONFormat } from "./formats/messagejson-format";
@@ -46,6 +47,7 @@ export class FileFormatService {
   private readonly srt: SRTFormat;
   private readonly kvjson: KVJSONFormat;
   private readonly messagejson: MESSAGEJSONFormat;
+  private readonly guishuipage: GuishuiPageFormat;
   private readonly xlsx: XLSXFormat;
   private readonly wolfxlsx: WOLFXLSXFormat;
   private readonly trans: TRANSFormat;
@@ -64,6 +66,7 @@ export class FileFormatService {
     this.srt = new SRTFormat(config);
     this.kvjson = new KVJSONFormat();
     this.messagejson = new MESSAGEJSONFormat(config);
+    this.guishuipage = new GuishuiPageFormat();
     this.xlsx = new XLSXFormat();
     this.wolfxlsx = new WOLFXLSXFormat();
     this.trans = new TRANSFormat();
@@ -109,6 +112,10 @@ export class FileFormatService {
         : await this.xlsx.read_from_stream(content, rel_path);
     }
     if (ext === ".json") {
+      const guishuipage_items = await this.guishuipage.read_from_stream(content, rel_path);
+      if (guishuipage_items.length > 0) {
+        return guishuipage_items;
+      }
       const kv_items = await this.kvjson.read_from_stream(content, rel_path);
       return kv_items.length > 0
         ? kv_items
@@ -213,6 +220,7 @@ export class FileFormatService {
     await this.srt.write_to_path(items, paths);
     await this.kvjson.write_to_path(items, paths);
     await this.messagejson.write_to_path(items, paths);
+    await this.guishuipage.write_to_path(items, paths);
     await this.xlsx.write_to_path(items, paths);
     await this.wolfxlsx.write_to_path(items, paths, asset_reader);
     await this.trans.write_to_path(items, paths, asset_reader);

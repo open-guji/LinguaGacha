@@ -69,6 +69,7 @@ export const zh_cn_project_page = {
     trans_project: "Translator++ 项目文件",
     trans_export: "Translator++ 导出游戏文本",
     wolf: "WOLF 官方翻译工具游戏文本",
+    guishuipage: "谷水书页 id/pages 结构",
   },
   drop_multiple_unavailable: "一次只能拖拽一个文件或文件夹",
   drop_unavailable: "当前无法读取拖拽文件的本地路径，请换用点击选择。",

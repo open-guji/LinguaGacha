@@ -73,6 +73,7 @@ export const de_de_project_page = {
     trans_project: "Translator++ Projekt",
     trans_export: "Translator++ Spieltext",
     wolf: "WOLF Offizielles Übersetzungstool",
+    guishuipage: "Guishui-Seiten id/pages-Struktur",
   },
   drop_multiple_unavailable: "Es kann nur eine Datei oder ein Ordner gleichzeitig abgelegt werden",
   drop_unavailable:

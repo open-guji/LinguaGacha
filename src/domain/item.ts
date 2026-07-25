@@ -32,6 +32,7 @@ export const ITEM_FILE_TYPES = [
   "TRANS",
   "KVJSON",
   "MESSAGEJSON",
+  "GUISHUIPAGE",
 ] as const;
 
 /**

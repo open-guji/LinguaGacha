@@ -73,6 +73,7 @@ export const en_us_project_page = {
     trans_project: "Translator++ Project",
     trans_export: "Translator++ Game Text",
     wolf: "WOLF Offical Tran-Tool",
+    guishuipage: "Guishui Page id/pages Structure",
   },
   drop_multiple_unavailable: "Only one file or folder can be dropped at a time",
   drop_unavailable:

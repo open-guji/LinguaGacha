@@ -22,6 +22,19 @@
 - 如您在翻译过程中使用了 [LinguaGacha](https://github.com/neavo/LinguaGacha) ，请在作品信息或发布页面的显要位置进行说明！
 - 如您的项目涉及任何商业行为或者商业收益，在使用 [LinguaGacha](https://github.com/neavo/LinguaGacha) 前，请先与作者联系以获得授权！
 
+## 本 Fork 新增：文言文加标点 🖋️
+- 本 fork 在原版基础上新增了「给未标点文言文加标点」的专用能力，不是通用翻译功能的附带效果
+- 使用方法：
+  1. 正常拖入待处理文件创建工程
+  2. 在 `基础设置` 中，将 `译文语言` 设置为 `中文（繁体，文言文）`
+  3. 在 `工作台` 中执行 `翻译`，输出即为原文逐字保留、只添加了标点的文本
+- 该目标语言由代码层面强制走固定的标点复原提示词，与自定义提示词、预设开关无关，选中它就不可能被当成普通翻译误用：
+  - 只允许插入或修正标点符号，原文的错字、异体字、生僻字一律逐字保留，不纠正、不替换、不转换简繁字形
+  - 严禁将文言文转换为白话文，严禁意译、改写或补全原文没有的内容
+- `校对` 页相应新增了 `未添加标点` 警告：当模型对某条内容原样返回、完全没有添加标点时会被单独标出，不再和正常结果一起被笼统地判定为「相似度过高」
+- 新增内置预设模型 `荀子大模型`（[xunziallm.njau.edu.cn](http://xunziallm.njau.edu.cn/)，古汉语专用、OpenAI 兼容接口），在 `模型管理` 的预设模型卡片中直接选用即可，效果请自行实测
+- 新增支持"谷水书页" JSON 格式（`{"id": ..., "pages": [...]}` 结构）的导入导出，用于对接谷水藏书类文言文原始素材
+
 ## 功能优势 📌
 - 极快的翻译速度，十秒钟一份字幕，一分钟一本小说，五分钟一部游戏
 - 一键生成术语表，保证角色姓名等专有名词在整部作品中的译名统一　`👈👈 独家绝技`
@@ -84,6 +97,7 @@
 - [Translator++](https://dreamsavior.net/translator-plusplus) 项目文件（.trans）
 - [Translator++](https://dreamsavior.net/translator-plusplus) 导出游戏文本（.xlsx）
 - [WOLF 官方翻译工具](https://silversecond.booth.pm/items/5151747) 导出游戏文本（.xlsx）
+- 谷水书页 `id`/`pages` 结构（.json）　`👈👈 本 fork 新增`
 - 具体示例可见 [Wiki - 支持的文件格式](https://github.com/neavo/LinguaGacha/wiki/%E6%94%AF%E6%8C%81%E7%9A%84%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F)，更多格式将持续添加，你也可以在 [ISSUES](https://github.com/neavo/LinguaGacha/issues) 中提出你的需求
 
 ## 近期更新 📅

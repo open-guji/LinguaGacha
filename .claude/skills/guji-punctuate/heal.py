@@ -31,6 +31,10 @@ PUNCT_CHARS = set(
     "，。、；：？！“”‘’「」『』《》〈〉（）()［］[]【】…—-·,.:;!?\"'"
 )
 
+# 去标点后字数不超过这个阈值、且模型原样返回的页面，大概率是标题/卷末标记这类
+# 本来就不需要断句的短语，不计入"需要重转"，避免浪费模型调用和误报。
+SHORT_HEADING_MAX_CHARS = 15
+
 SKILL_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SKILL_DIR.parents[2]
 ELECTRON_BUNDLE = REPO_ROOT / "build" / "dist-electron" / "index.js"
@@ -55,10 +59,16 @@ def strip_with_positions(text: str) -> tuple[str, list[int]]:
 def classify_and_heal_page(
     src_text: str, dst_text: str, max_op_size: int, max_total_diff: int
 ) -> tuple[str, str]:
-    """返回 (处理后的文本, 状态)。状态: unchanged / healed / needs_retranslate。"""
+    """返回 (处理后的文本, 状态)。
+    状态: unchanged / healed / needs_retranslate / likely_heading。
+    """
     if src_text.strip() == "":
         return dst_text, "unchanged"
     if src_text == dst_text:
+        stripped_len = len(strip_with_positions(src_text)[0])
+        if stripped_len <= SHORT_HEADING_MAX_CHARS:
+            # 短标题/卷末标记本来就可能不需要标点，不算失败，也不浪费一次重转
+            return dst_text, "likely_heading"
         return dst_text, "needs_retranslate"  # 完全没加标点
 
     dst_stripped, dst_positions = strip_with_positions(dst_text)
@@ -162,6 +172,7 @@ def heal_file(source_path: Path, output_path: Path, max_op_size: int, max_total_
     healed_pages = copy.deepcopy(dst_pages)
     healed_count = 0
     retranslate_indices: list[int] = []
+    likely_heading_indices: list[int] = []
 
     for i, (s, d) in enumerate(zip(src_pages, dst_pages)):
         healed_text, status = classify_and_heal_page(s, d, max_op_size, max_total_diff)
@@ -170,8 +181,15 @@ def heal_file(source_path: Path, output_path: Path, max_op_size: int, max_total_
             healed_count += 1
         elif status == "needs_retranslate":
             retranslate_indices.append(i)
+        elif status == "likely_heading":
+            likely_heading_indices.append(i)
 
     print(f"[{output_path.name}] 直接改字修复: {healed_count} 页；需要重转: {len(retranslate_indices)} 页 {retranslate_indices}")
+    if likely_heading_indices:
+        print(
+            f"[{output_path.name}] 疑似标题/卷末标记，本来就可能不需要标点，未计入失败，建议扫一眼确认："
+            f"{likely_heading_indices}"
+        )
 
     still_bad: list[int] = []
     if retranslate_indices and not dry_run:

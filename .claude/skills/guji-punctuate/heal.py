@@ -64,14 +64,20 @@ def classify_and_heal_page(
     """
     if src_text.strip() == "":
         return dst_text, "unchanged"
-    if src_text == dst_text:
+
+    dst_stripped, dst_positions = strip_with_positions(dst_text)
+    dst_has_any_punct = len(dst_text) > len(dst_stripped)
+
+    if src_text == dst_text or not dst_has_any_punct:
+        # dst 完全没有标点：哪怕去标点比对后只差一两个字，本质仍是标点复原失败，
+        # 绝不能走"改字修复"分支——那样会把仅有的字符差异改掉，
+        # 结果变成"逐字等于原文"，等于把没加标点的失败伪装成了修好。
         stripped_len = len(strip_with_positions(src_text)[0])
         if stripped_len <= SHORT_HEADING_MAX_CHARS:
             # 短标题/卷末标记本来就可能不需要标点，不算失败，也不浪费一次重转
             return dst_text, "likely_heading"
-        return dst_text, "needs_retranslate"  # 完全没加标点
+        return dst_text, "needs_retranslate"
 
-    dst_stripped, dst_positions = strip_with_positions(dst_text)
     src_stripped, _ = strip_with_positions(src_text)
     if src_stripped == dst_stripped:
         return dst_text, "unchanged"  # 只是标点不同，用字完全一致，没问题

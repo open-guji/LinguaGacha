@@ -148,7 +148,7 @@ describe("TranslationWorkUnitRunner", () => {
     expect(String(result.logs[0]?.message ?? "")).not.toContain("行数不一致");
   });
 
-  it("永久性请求错误直接标记条目为 ERROR，不再等待重试", async () => {
+  it("永久性请求错误仍保留 NONE 状态交给 Engine 决定重试（不绕过多 Key 轮换/拆分重试），只在日志上区分", async () => {
     const runner = new TranslationWorkUnitRunner(
       await create_template_root(),
       create_llm_client({
@@ -167,7 +167,7 @@ describe("TranslationWorkUnitRunner", () => {
 
     expect(result.outcome).toBe("failed");
     const items = result.output.kind === "translation" ? result.output.items : [];
-    expect(items).toMatchObject([{ status: "ERROR" }]);
+    expect(items).toMatchObject([{ status: "NONE" }]);
     expect(String(result.logs[0]?.message ?? "")).toContain("鉴权或参数错误");
   });
 

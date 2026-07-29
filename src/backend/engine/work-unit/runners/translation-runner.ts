@@ -347,19 +347,6 @@ export class TranslationWorkUnitRunner {
       request_error: context.request_error,
       request: context.request,
     });
-    if (context.request_error !== undefined && !context.request_error_retryable) {
-      for (const item of context.items) {
-        item.status = "ERROR";
-      }
-      return {
-        items: context.items,
-        row_count: 0,
-        input_tokens: response.input_tokens,
-        output_tokens: response.output_tokens,
-        stopped: false,
-        logs,
-      };
-    }
     let updated_count = 0;
     if (decision.used_fallback && decision.fallback_dst !== null) {
       const item = context.items[0];

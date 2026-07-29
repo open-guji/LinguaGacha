@@ -270,7 +270,11 @@ export class TaskEngine {
     limiter: TaskLimiter,
     signal: AbortSignal,
   ) {
-    await this.wait_before_retry(context.retry_count, signal);
+    await this.wait_before_retry(
+      !context.is_initial,
+      Math.max(context.retry_count, context.split_count),
+      signal,
+    );
     const result = await this.call_translation_executor_with_retryable_transport(
       context,
       handle,
@@ -318,7 +322,8 @@ export class TaskEngine {
     limiter: TaskLimiter,
     signal: AbortSignal,
   ) {
-    await this.wait_before_retry(context.retry_count, signal);
+    // 分析任务失败只重发同一 chunk，不做拆分，retry_count 不会被重置，直接用它判断是否重试
+    await this.wait_before_retry(context.retry_count > 0, context.retry_count, signal);
     const result = await this.call_with_limiter(handle, limiter, signal, () =>
       this.executor_client
         .execute_unit(
@@ -374,23 +379,36 @@ export class TaskEngine {
   }
 
   /**
-   * 重试前固定退避；首次尝试（retry_count 为 0）不等待，停止信号触发时立即放弃等待
+   * 重试前固定退避；is_retry 由调用方按各自的重试语义判断（翻译看 is_initial，
+   * 因为拆分重试会把 retry_count 归零，只看 retry_count 会漏掉主要重试路径）。
+   * 停止信号触发时立即放弃等待，正常和异常路径都会移除 abort listener，避免长任务堆积监听器。
    */
-  private async wait_before_retry(retry_count: number, signal: AbortSignal): Promise<void> {
-    const delay_ms = retry_count > 0 ? this.retry_backoff_ms(retry_count) : 0;
-    if (delay_ms <= 0 || signal.aborted) {
+  private async wait_before_retry(
+    is_retry: boolean,
+    attempt_depth: number,
+    signal: AbortSignal,
+  ): Promise<void> {
+    if (!is_retry || signal.aborted) {
+      return;
+    }
+    const delay_ms = this.retry_backoff_ms(Math.max(1, attempt_depth));
+    if (delay_ms <= 0) {
       return;
     }
     await new Promise<void>((resolve) => {
-      const timer = setTimeout(resolve, delay_ms);
-      signal.addEventListener(
-        "abort",
-        () => {
-          clearTimeout(timer);
-          resolve();
-        },
-        { once: true },
-      );
+      let settled = false;
+      const on_abort = (): void => finish();
+      const timer = setTimeout(() => finish(), delay_ms);
+      function finish(): void {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        signal.removeEventListener("abort", on_abort);
+        resolve();
+      }
+      signal.addEventListener("abort", on_abort, { once: true });
     });
   }
 

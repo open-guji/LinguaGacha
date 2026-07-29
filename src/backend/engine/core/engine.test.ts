@@ -227,6 +227,67 @@ describe("TaskEngine", () => {
     expect(committed_items.every((item) => item["status"] === "PROCESSED")).toBe(true);
   });
 
+  it("多条 chunk 拆分重试时 retry_count 归零，仍需按 split_count 触发退避", async () => {
+    const done = create_status_waiter("translation", "done");
+    const failed_once_ids = new Set<number>();
+    const backoff_calls: number[] = [];
+    const task_engine = new TaskEngine({
+      appRoot: process.cwd(),
+      taskStore: {
+        get_translation_items: () => ({
+          items: [create_pending_item(1, "a.txt"), create_pending_item(2, "b.txt")] as unknown as ApiJsonValue,
+          meta: {},
+        }),
+        acquire_project_lease: () => () => undefined,
+        commit_artifacts: () => ({ accepted: true }),
+        update_translation_progress: () => ({ accepted: true }),
+        build_quality_snapshot: () => null,
+      } as unknown as ProjectTaskStore,
+      taskRunPublisher: create_task_run_publisher(done.publish),
+      executorClient: {
+        execute_unit: async (unit: MutableJsonRecord) => {
+          const payload =
+            typeof unit["payload"] === "object" && unit["payload"] !== null
+              ? (unit["payload"] as MutableJsonRecord)
+              : {};
+          const items = (Array.isArray(payload["items"]) ? payload["items"] : []) as MutableJsonRecord[];
+          const item_id = Number(items[0]?.["id"] ?? 0);
+          if (item_id === 1 && !failed_once_ids.has(item_id)) {
+            failed_once_ids.add(item_id);
+            throw new WorkUnitExecutorTransportError(
+              log_error_from_message("fetch failed"),
+              new TypeError("fetch failed"),
+            );
+          }
+          return create_translation_worker_result(
+            items.map((item) => ({ ...item, dst: `译文${String(item["id"] ?? "")}`, status: "PROCESSED" })),
+            items.length,
+            1,
+            1,
+          );
+        },
+      } as unknown as WorkUnitExecutor,
+      taskPlanner: create_test_task_planner(),
+      AppSettingService: create_setting_service(2),
+      logManager: create_log_manager(),
+      retryBackoffMs: (retry_count) => {
+        backoff_calls.push(retry_count);
+        return 0;
+      },
+    });
+
+    await task_engine.start({
+      task_type: "translation",
+      mode: "new",
+      scope: { kind: "all" },
+      expected_section_revisions: {},
+    });
+    await done.promise;
+
+    // 拆分产生的重试 work unit retry_count 是 0，但仍应触发退避（不能只看 retry_count > 0）
+    expect(backoff_calls.length).toBeGreaterThan(0);
+  });
+
   it("翻译切块使用注入 token 计数器而不是字符长度估算", async () => {
     const executed_batches: number[][] = []; // 记录 executor 可见的 chunk 分组，证明长文本仍可被 fake token 预算合并
     const done = create_status_waiter("translation", "done");
